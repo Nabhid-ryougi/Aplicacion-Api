@@ -1,0 +1,798 @@
+{
+  "info": {
+    "name": "SmartConnect API",
+    "description": "Colección completa de endpoints para SmartConnect - Sistema de Control de Acceso",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Información",
+      "item": [
+        {
+          "name": "GET /api/info/",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/info/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "info", ""]
+            },
+            "description": "Endpoint obligatorio con información del proyecto (sin autenticación)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Autenticación",
+      "item": [
+        {
+          "name": "POST Login - Obtener Token (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", jsonData.access);",
+                  "pm.collectionVariables.set(\"refresh_token\", jsonData.refresh);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/token/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "token", ""]
+            },
+            "description": "Obtener token JWT para usuario Admin"
+          }
+        },
+        {
+          "name": "POST Login - Obtener Token (Operador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", jsonData.access);",
+                  "pm.collectionVariables.set(\"refresh_token\", jsonData.refresh);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operador\",\n  \"password\": \"operador123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/token/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "token", ""]
+            },
+            "description": "Obtener token JWT para usuario Operador"
+          }
+        },
+        {
+          "name": "POST Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", jsonData.access);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "token", "refresh", ""]
+            },
+            "description": "Renovar token de acceso usando el refresh token"
+          }
+        },
+        {
+          "name": "POST Logout - Cerrar Sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "logout", ""]
+            },
+            "description": "Cerrar sesión e invalidar el refresh token. Después de esto, el token no podrá usarse para renovar el acceso."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Usuarios",
+      "item": [
+        {
+          "name": "GET Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@smartconnect.com\",\n  \"first_name\": \"Nuevo\",\n  \"last_name\": \"Usuario\",\n  \"rol\": \"OPERADOR\",\n  \"telefono\": \"+56912345678\",\n  \"password\": \"password123\",\n  \"password_confirm\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", ""]
+            }
+          }
+        },
+        {
+          "name": "PUT Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"usuario_actualizado\",\n  \"email\": \"actualizado@smartconnect.com\",\n  \"first_name\": \"Usuario\",\n  \"last_name\": \"Actualizado\",\n  \"rol\": \"OPERADOR\",\n  \"password\": \"newpassword123\",\n  \"password_confirm\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/3/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "3", ""]
+            }
+          }
+        },
+        {
+          "name": "DELETE Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/3/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "3", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Departamentos",
+      "item": [
+        {
+          "name": "GET Listar Departamentos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/departamentos/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "departamentos", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Departamento por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/departamentos/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "departamentos", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Departamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nuevo Departamento\",\n  \"descripcion\": \"Descripción del departamento\",\n  \"ubicacion\": \"Piso 4, Ala Sur\",\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/departamentos/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "departamentos", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Sensores de Departamento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/departamentos/1/sensores/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "departamentos", "1", "sensores", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Sensores",
+      "item": [
+        {
+          "name": "GET Listar Sensores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sensores/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Sensores Activos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sensores/activos/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", "activos", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Sensor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"RFID-007-TEST\",\n  \"nombre\": \"Sensor de Prueba\",\n  \"descripcion\": \"Sensor creado desde Postman\",\n  \"estado\": \"ACTIVO\",\n  \"departamento\": 1,\n  \"usuario_asignado\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sensores/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Cambiar Estado Sensor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"BLOQUEADO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sensores/1/cambiar_estado/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", "1", "cambiar_estado", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Barreras",
+      "item": [
+        {
+          "name": "GET Listar Barreras",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/barreras/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "barreras", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Barrera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Barrera Nueva\",\n  \"departamento\": 1,\n  \"estado\": \"CERRADA\",\n  \"descripcion\": \"Barrera de prueba\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/barreras/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "barreras", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Abrir Barrera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accion\": \"ABRIR\",\n  \"descripcion\": \"Apertura manual desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/barreras/1/controlar/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "barreras", "1", "controlar", ""]
+            }
+          }
+        },
+        {
+          "name": "POST Cerrar Barrera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accion\": \"CERRAR\",\n  \"descripcion\": \"Cierre manual desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/barreras/1/controlar/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "barreras", "1", "controlar", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Eventos",
+      "item": [
+        {
+          "name": "GET Listar Eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/eventos/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "eventos", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Eventos Recientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/eventos/recientes/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "eventos", "recientes", ""]
+            }
+          }
+        },
+        {
+          "name": "GET Filtrar por Tipo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/eventos/por_tipo/?tipo=ACCESO_PERMITIDO",
+              "host": ["{{base_url}}"],
+              "path": ["api", "eventos", "por_tipo", ""],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "ACCESO_PERMITIDO"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Acceso por Sensor (IoT)",
+      "item": [
+        {
+          "name": "POST Acceso Permitido (Sensor Activo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"RFID-001-ABC\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/acceso/sensor/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "acceso", "sensor", ""]
+            },
+            "description": "Simula acceso con sensor activo - debería permitir acceso"
+          }
+        },
+        {
+          "name": "POST Acceso Denegado (Sensor Bloqueado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"RFID-006-PQR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/acceso/sensor/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "acceso", "sensor", ""]
+            },
+            "description": "Simula acceso con sensor bloqueado - debería denegar acceso"
+          }
+        },
+        {
+          "name": "POST Acceso UID No Registrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"RFID-999-XXX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/acceso/sensor/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "acceso", "sensor", ""]
+            },
+            "description": "Simula acceso con UID no registrado - debería devolver 404"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Manejo de Errores",
+      "item": [
+        {
+          "name": "401 - Sin Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", ""]
+            },
+            "description": "Intenta acceder sin token - debería devolver 401"
+          }
+        },
+        {
+          "name": "403 - Sin Permisos (Operador intenta crear)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"TEST\",\n  \"nombre\": \"Test\",\n  \"estado\": \"ACTIVO\",\n  \"departamento\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sensores/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", ""]
+            },
+            "description": "Operador intenta crear sensor - debería devolver 403"
+          }
+        },
+        {
+          "name": "404 - Recurso No Encontrado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sensores/9999/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", "9999", ""]
+            },
+            "description": "Intenta acceder a sensor inexistente - debería devolver 404"
+          }
+        },
+        {
+          "name": "404 - Ruta Inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ruta-inexistente/",
+              "host": ["{{base_url}}"],
+              "path": ["ruta-inexistente", ""]
+            },
+            "description": "Accede a ruta que no existe - debería devolver 404 personalizado"
+          }
+        },
+        {
+          "name": "400 - Validación (UID duplicado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"RFID-001-ABC\",\n  \"nombre\": \"Duplicado\",\n  \"estado\": \"ACTIVO\",\n  \"departamento\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sensores/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sensores", ""]
+            },
+            "description": "Intenta crear sensor con UID duplicado - debería devolver 400"
+          }
+        }
+      ]
+    }
+  ]
+}
