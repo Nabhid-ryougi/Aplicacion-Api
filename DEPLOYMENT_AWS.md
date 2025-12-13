@@ -1,33 +1,200 @@
-# 🚀 Guía de Despliegue en AWS - SmartConnect API
+# 🚀 Guía de Despliegue en AWS - SmartConnect API (Desde GitHub)
 
 ## 📋 Índice
-1. [Preparación del Proyecto](#1-preparación-del-proyecto)
-2. [Configuración de AWS EC2](#2-configuración-de-aws-ec2)
-3. [Instalación en el Servidor](#3-instalación-en-el-servidor)
-4. [Configuración de Gunicorn](#4-configuración-de-gunicorn)
-5. [Configuración de Nginx](#5-configuración-de-nginx)
-6. [Configuración de Seguridad](#6-configuración-de-seguridad)
-7. [Verificación y Pruebas](#7-verificación-y-pruebas)
+1. [Preparación Local](#1-preparación-local)
+2. [Subir Proyecto a GitHub](#2-subir-proyecto-a-github)
+3. [Configuración de AWS EC2](#3-configuración-de-aws-ec2)
+4. [Despliegue Automático](#4-despliegue-automático)
+5. [Configuración Manual (Alternativa)](#5-configuración-manual-alternativa)
+6. [Verificación y Pruebas](#6-verificación-y-pruebas)
+7. [Solución de Problemas](#7-solución-de-problemas)
 
 ---
 
-## 1. Preparación del Proyecto
+## 1. Preparación Local
 
-### 1.1 Actualizar settings.py para producción
+### 1.1 Verificar archivos necesarios
 
-Crear archivo `settings_prod.py` o modificar `settings.py`:
+Asegúrate de tener estos archivos en tu proyecto:
 
-```python
-import os
-from pathlib import Path
+- ✅ `requirements-prod.txt` - Dependencias para producción
+- ✅ `deploy.sh` - Script de despliegue automático
+- ✅ `.gitignore` - Archivos a ignorar en Git
+- ✅ `crear_datos_prueba.py` - Script para datos iniciales
 
-# SEGURIDAD
-DEBUG = False  # ¡IMPORTANTE! Siempre False en producción
-SECRET_KEY = os.environ.get('SECRET_KEY', 'tu-secret-key-segura-aqui')
+### 1.2 Actualizar .gitignore
 
-# Configurar con tu IP o dominio de AWS
-ALLOWED_HOSTS = [
-    'tu-ip-publica-aws.amazonaws.com',
+```
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# Entorno
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+```
+
+---
+
+## 2. Subir Proyecto a GitHub
+
+### 2.1 Inicializar repositorio Git (si no lo has hecho)
+
+```bash
+git init
+git add .
+git commit -m "Proyecto SmartConnect API listo para despliegue"
+```
+
+### 2.2 Crear repositorio en GitHub
+
+1. Ve a https://github.com/new
+2. Nombre: `Aplicacion-Api` o el que prefieras
+3. Descripción: "API RESTful SmartConnect - Sistema de Control de Acceso"
+4. **Público** o **Privado** (recomendado: Privado)
+5. NO inicialices con README (ya tienes archivos)
+6. Click en **"Create repository"**
+
+### 2.3 Conectar y subir
+
+```bash
+git remote add origin https://github.com/TU-USUARIO/Aplicacion-Api.git
+git branch -M main
+git push -u origin main
+```
+
+**Si el repo es privado**, necesitarás generar un Personal Access Token:
+1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate new token
+3. Selecciona: `repo` (full control)
+4. Copia el token generado
+5. Úsalo como contraseña al hacer push
+
+---
+
+## 3. Configuración de AWS EC2
+
+### 3.1 Crear instancia EC2
+
+1. Accede a **AWS Console** → **EC2** → **Launch Instance**
+
+2. **Configuración recomendada:**
+   - **Nombre:** `smartconnect-api-server`
+   - **AMI:** Ubuntu Server 22.04 LTS (HVM)
+   - **Tipo de instancia:** t2.micro (Free Tier) o t2.small
+   - **Par de claves (Key pair):**
+     - Crear nueva: `smartconnect-key.pem`
+     - Guardar en lugar seguro
+   
+3. **Configurar Security Group:**
+   - **Nombre:** `smartconnect-sg`
+   - **Reglas de entrada (Inbound rules):**
+     ```
+     SSH    | TCP | 22   | Tu IP o 0.0.0.0/0
+     HTTP   | TCP | 80   | 0.0.0.0/0
+     HTTPS  | TCP | 443  | 0.0.0.0/0
+     Custom | TCP | 8000 | 0.0.0.0/0 (temporal para pruebas)
+     ```
+
+4. **Almacenamiento:** 20 GB (suficiente)
+
+5. Click en **"Launch instance"**
+
+6. **Anotar la IP pública** (aparece en la consola EC2)
+
+### 3.2 Conectarse a la instancia
+
+**En Windows (PowerShell):**
+```powershell
+# Dar permisos al archivo .pem
+icacls smartconnect-key.pem /inheritance:r
+icacls smartconnect-key.pem /grant:r "$($env:USERNAME):(R)"
+
+# Conectar via SSH
+ssh -i smartconnect-key.pem ubuntu@TU-IP-PUBLICA
+```
+
+**En Linux/Mac:**
+```bash
+chmod 400 smartconnect-key.pem
+ssh -i smartconnect-key.pem ubuntu@TU-IP-PUBLICA
+```
+
+---
+
+## 4. Despliegue Automático
+
+### 4.1 Método rápido (Script automatizado)
+
+Una vez conectado a tu instancia EC2:
+
+```bash
+# 1. Descargar el script de despliegue
+wget https://raw.githubusercontent.com/TU-USUARIO/Aplicacion-Api/main/deploy.sh
+
+# 2. Dar permisos de ejecución
+chmod +x deploy.sh
+
+# 3. Ejecutar el script
+bash deploy.sh
+```
+
+El script te pedirá la URL de tu repositorio Git. Ingresa:
+```
+https://github.com/TU-USUARIO/Aplicacion-Api.git
+```
+
+**Si tu repo es privado**, necesitarás autenticarte:
+```bash
+# Configurar credenciales de Git
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu@email.com"
+
+# Al clonar, usa tu Personal Access Token como contraseña
+```
+
+### 4.2 El script hace automáticamente:
+
+- ✅ Actualiza el sistema Ubuntu
+- ✅ Instala Python 3, pip, nginx, git
+- ✅ Clona tu repositorio desde GitHub
+- ✅ Crea entorno virtual
+- ✅ Instala dependencias Python
+- ✅ Genera SECRET_KEY seguro
+- ✅ Aplica migraciones
+- ✅ Crea datos de prueba
+- ✅ Configura Gunicorn como servicio
+- ✅ Configura Nginx
+- ✅ Configura firewall
+- ✅ Inicia todos los servicios
+
+---
+
+## 5. Configuración Manual (Alternativa)
     'ec2-XX-XXX-XXX-XXX.compute-1.amazonaws.com',
     'tu-dominio.com',
     'localhost',
@@ -147,7 +314,7 @@ GRANT ALL PRIVILEGES ON DATABASE smartconnect_db TO admin;
 **Opción A: Usando Git**
 ```bash
 cd /home/ubuntu
-git clone <url-repositorio> smartconnect
+git clone <https://github.com/Nabhid-ryougi/Aplicacion-Api.git> smartconnect
 cd smartconnect
 ```
 
