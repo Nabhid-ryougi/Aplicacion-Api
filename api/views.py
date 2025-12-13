@@ -24,12 +24,12 @@ def api_info(request):
     return Response({
         "success": True,
         "data": {
-            "autor": ["Dilan - Equipo SmartConnect"],
+            "autor": ["Dilan - Cortes","Jordana - Garcia"],
             "asignatura": "Programación Back End",
             "proyecto": "SmartConnect - Sistema de Control de Acceso Inteligente",
-            "descripcion": "API RESTful para gestión de sensores RFID, control de acceso, administración de usuarios y departamentos con sistema de eventos en tiempo real.",
+            "descripcion": "API de control de acceso inteligente",
             "version": "1.0",
-            "tecnologias": ["Django", "Django Rest Framework", "JWT", "SQLite"],
+            "tecnologias": ["Django", "Django Rest Framework"],
             "endpoints": {
                 "autenticacion": "/api/token/, /api/token/refresh/",
                 "usuarios": "/api/usuarios/",
